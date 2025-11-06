@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from generate_data import generate_product_data
+from generate_dirty_data import generate_dirty_inventory_data
 from great_expectations.validator.validator import Validator
 
 # Create Data Context.
@@ -12,7 +12,7 @@ context = gx.get_context()
 data_source = context.sources.add_pandas(name="product_data_source")
 
 # Read daframe
-df = generate_product_data(scenario="extra_column")
+df = generate_dirty_inventory_data(n_rows=100, scenario="mixed")
 
 # create data asset 
 data_asset = data_source.add_dataframe_asset(name="product_dataframe")
