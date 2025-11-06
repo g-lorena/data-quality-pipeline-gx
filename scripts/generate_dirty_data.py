@@ -61,3 +61,6 @@ def save_datasets():
     os.makedirs('data/raw', exist_ok=True)
     df_dirty = generate_dirty_inventory_data(n_rows=100, scenario="mixed")
     df_dirty.to_csv('data/raw/inventory_dirty.csv', index=False)
+    print(df_dirty.head())
+
+save_datasets()
