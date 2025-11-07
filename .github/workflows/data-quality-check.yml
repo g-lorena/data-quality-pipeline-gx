@@ -31,4 +31,4 @@ jobs:
  
     - name: Run Checkpoint
       run: |
-        python great_expectations/schema_validation.py
+        python -m great_expectations.schema_validation.py

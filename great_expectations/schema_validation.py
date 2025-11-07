@@ -2,8 +2,8 @@ import datetime
 import pandas as pd
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from scripts.generate_dirty_data import generate_dirty_inventory_data
 from great_expectations.validator.validator import Validator
+from scripts.generate_dirty_data import generate_dirty_inventory_data
 
 # Create Data Context.
 context = gx.get_context()

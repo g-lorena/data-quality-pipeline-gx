@@ -2,5 +2,6 @@ data/raw
 .env
 .venv
 .myenv
+myenv
 
 _DS_Store
