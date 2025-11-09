@@ -7,3 +7,4 @@ myenv
 _DS_Store
 gx_project/__pycache__/__init__.cpython-313.pyc
 gx_project/__pycache__/
+scripts/__pycache__/

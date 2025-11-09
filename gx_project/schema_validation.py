@@ -20,74 +20,66 @@ df = generate_dirty_inventory_data(n_rows=100, scenario="mixed")
 # create data asset 
 data_asset = data_source.add_dataframe_asset(name="product_dataframe")
 
-# build batch request 
-batch_request = data_asset.build_batch_request(dataframe=df)
+batch_definition_name = "my_batch_definition"
 
-suite1 = context.add_or_update_expectation_suite("product_inventory_schema_validation")
-suite1 = context.add_or_update_expectation_suite("business_rules_validation")
-
-# validate 
-validator1 = context.get_validator(
-    batch_request=batch_request,
-    expectation_suite_name="product_inventory_schema_validation",
-)
-result = validator1.expect_table_column_count_to_equal(
-    value=7
+batch_definition = data_asset.add_batch_definition_whole_dataframe(
+    name=batch_definition_name
 )
 
-validator1.save_expectation_suite(discard_failed_expectations=False)
-
-
-validator2 = context.get_validator(
-    batch_request=batch_request,
-    expectation_suite_name="product_inventory_schema_validation",
+suite1 = context.suites.add(
+    gx.ExpectationSuite(name="product_inventory_schema_validation")
 )
 
-validator2 = context.get_validator(
-    batch_request=batch_request,
-    expectation_suite_name="business_rules_validation",
+suite2 = context.suites.add(
+    gx.ExpectationSuite(name="business_rules_validation")
 )
 
-result = validator2.expect_column_values_to_match_regex(column="product_id", regex=r"^PROD_\d{3}$")
-
-validator2.save_expectation_suite(discard_failed_expectations=False)
-
-# create a checkpoint to run the validation
-checkpoint = context.add_or_update_checkpoint(
-    name="product_inventory_schema_validation_checkpoint",
-    validations=[
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": "product_inventory_schema_validation",
-        },
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": "business_rules_validation",
-        }
-    ]
-   # validator=validator
+suite1.add_expectation(
+    gxe.ExpectTableColumnCountToEqual(value=7)
 )
 
-# execute the checkpoint
-checkpoint_result = checkpoint.run()
+suite2.add_expectation(
+    gxe.ExpectColumnValuesToMatchRegex(column="product_id", regex=r"^PROD_\d{3}$")
+)
 
 
+validation_definition1 = gx.ValidationDefinition(
+    data=batch_definition, suite=suite1, name="product_inventory_schema_validation"
+)
+
+validation_definition1 = context.validation_definitions.add(validation_definition1)
+
+validation_definition2 = gx.ValidationDefinition(
+    data=batch_definition, suite=suite2, name="business_rules_validation"
+)
+validation_definition2 = context.validation_definitions.add(validation_definition2)
+
+
+checkpoint = gx.Checkpoint(
+    name="product_inventory_checkpoint",
+    validation_definitions=[validation_definition1, validation_definition2]
+)
+
+checkpoint = context.checkpoints.add(checkpoint)
+
+checkpoint_result = checkpoint.run(
+    batch_parameters={"dataframe": df}  
+)
  
 if __name__ == "__main__":
-    if checkpoint_result["success"]:
+    if checkpoint_result.success:
         print("PASS: All validations passed!")
     else:
         print("FAIL: Some validations failed")
 
-         
         for validation_result in checkpoint_result.run_results.values():
-            print("----------")
-            print(validation_result)
-            for expectation_result in validation_result["validation_result"]["results"]:
-                if not expectation_result["success"]:
-                    print(f"\nFailed expectation: {expectation_result['expectation_config']['expectation_type']}")
-                    print(f"Details: {expectation_result.get('result', {})}")
+            # Correction ici: pas besoin de ["validation_result"]
+            print(f"\nSuite: {validation_result.suite_name}")
+            
+            for result in validation_result.results:
+                if not result.success:
+                    print(f"  ✗ {result.expectation_config.type}")
+                    print(f"    {result.result}")
         
-        #print(f"FAIL: {result['unexpected_count']} rows have incorrect type for product_id")
-        #print("Example of unexpected values:", result["result"]["partial_unexpected_list"])
+        print()
         
