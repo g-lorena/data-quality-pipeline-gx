@@ -5,5 +5,5 @@ data/raw
 myenv
 
 _DS_Store
-gx/__pycache__/__init__.cpython-313.pyc
-gx/__pycache__/
+gx_project/__pycache__/__init__.cpython-313.pyc
+gx_project/__pycache__/
