@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-import great_expectations as gx
+import gx as gx
 import great_expectations.expectations as gxe
 from great_expectations.validator.validator import Validator
 from scripts.generate_dirty_data import generate_dirty_inventory_data
