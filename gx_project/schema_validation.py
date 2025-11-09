@@ -8,8 +8,11 @@ from scripts.generate_dirty_data import generate_dirty_inventory_data
 # Create Data Context.
 context = gx.get_context()
 
+data_source_name = "product_data_source"
+
 # Create a pandas datasource.
-data_source = context.sources.add_pandas(name="product_data_source")
+#data_source = context.sources.add_pandas(name="product_data_source")
+data_source = context.data_sources.add_pandas(name=data_source_name)
 
 # Read daframe
 df = generate_dirty_inventory_data(n_rows=100, scenario="mixed")
