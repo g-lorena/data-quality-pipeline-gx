@@ -34,5 +34,7 @@ jobs:
         python scripts/generate_dirty_data.py
  
     - name: Run Checkpoint
+      env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
       run: |
         python -m gx_project.schema_validation
