@@ -1,9 +1,11 @@
 import datetime
+import os
 import pandas as pd
 import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.validator.validator import Validator
 from scripts.generate_dirty_data import generate_dirty_inventory_data
+from great_expectations.checkpoint.actions import SlackNotificationAction
 
 # Create Data Context.
 context = gx.get_context()
@@ -54,10 +56,30 @@ validation_definition2 = gx.ValidationDefinition(
 )
 validation_definition2 = context.validation_definitions.add(validation_definition2)
 
+slack_webhook = os.getenv("SLACK_WEBHOOK_URL")
+
+actions = []
+if slack_webhook:
+    slack_action = SlackNotificationAction(
+        name="slack_notification",
+        slack_webhook=slack_webhook,  # Depuis variable d'environnement
+        notify_on="failure",
+        renderer={
+            "module_name": "great_expectations.render.renderer.slack_renderer",
+            "class_name": "SlackRenderer",
+        },
+    )
+    actions.append(slack_action)
+    print("✅ Slack notifications enabled")
+else:
+    print("⚠️  SLACK_WEBHOOK_URL not set. Slack notifications disabled.")
+
 
 checkpoint = gx.Checkpoint(
     name="product_inventory_checkpoint",
-    validation_definitions=[validation_definition1, validation_definition2]
+    validation_definitions=[validation_definition1, validation_definition2],
+    actions=actions,
+    result_format={"result_format": "COMPLETE"},
 )
 
 checkpoint = context.checkpoints.add(checkpoint)
